@@ -1,23 +1,42 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset='utf-8'>
-    <title>Where am I?</title>
-    <script type='text/javascript'
-    src='https://maps.googleapis.com/maps/api/js?sensor=true&libraries=places,weather'></script>
-    <script src='myLoc.js'></script>
-    <style type='text/css'>
-      html { height: 100% }
-      body { height: 100%; margin: 0; padding: 0 }
-      #map-canvas { height: 100% }
-    </style>
-  </head>
-  <body>
-    <div id='location'>
-      Your location will go here.
-    </div>
-    <div id='map-canvas'>
-      Google Map will go here!.
-    </div>
-  </body>
+<head>
+<title></title>
+<meta name="viewport" content ="initial-scale=1, maximum-scale=1, user-scalable=no">
+<link href="css/ratchet.min.css" rel="stylesheet">
+<style>
+.bar .btn {
+margin-top: -2px
+}
+</style>
+
+</head>
+<body>
+<header class="bar bar-nav">
+<input type="text" id="txtSource" value="London" style="width: 150px">
+<input type="text" id="txtDestination" value="Manchester" style="width: 150px">
+<input class="btn btn-primary"  value="Get Route" onclick="GetRoute()" style="width: 150px" />
+</header>
+<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false&libraries=places"></script>
+<script src="myLoc.js"></script>
+ <table border="0" cellpadding="0" cellspacing="3">
+  <tr>
+<td colspan="2">
+Source:
+<input type="text" id="txtSource" value="London" style="width: 150px">
+&nbsp; Destination:
+<input type="text" id="txtDestination" value="Manchester" style="width: 150px">
+<button class="btn btn-primary"  value="Get Route" onclick="GetRoute()" style="width: 150px" />
+                <hr />
+            </td>
+        </tr>
+    </table>
+<div id="dvDistance">
+</div>
+<div id="dvMap" style="width: 500px; height: 500px">
+                </div>
+<div id="dvPanel" style="width: 500px; height: 500px">
+                </div>				
+<script src="ratchet.min.js"></script>
+</body>
 </html>

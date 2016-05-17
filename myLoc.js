@@ -1,118 +1,57 @@
-window.onload = getMyLocation;
+var source, destination;
+        var directionsDisplay;
+        var directionsService = new google.maps.DirectionsService();
+        google.maps.event.addDomListener(window, 'load', function () {
+            new google.maps.places.SearchBox(document.getElementById('txtSource'));
+            new google.maps.places.SearchBox(document.getElementById('txtDestination'));
+            directionsDisplay = new google.maps.DirectionsRenderer({ 'draggable': true });
+        });
 
-var map;
-function getMyLocation() {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(displayLocation);
-  } else {
-    alert('Oops, no geolocation support');
-  }
-}
+        function GetRoute() {
+            var mumbai = new google.maps.LatLng(18.9750, 72.8258);
+            var mapOptions = {
+                zoom: 7,
+                center: mumbai
+            };
+            map = new google.maps.Map(document.getElementById('dvMap'), mapOptions);
+            directionsDisplay.setMap(map);
+            directionsDisplay.setPanel(document.getElementById('dvPanel'));
 
-//This function is inokved asynchronously by the HTML5 geolocation API.
-function displayLocation(position) {
-  //The latitude and longitude values obtained from HTML 5 API.
-  var latitude = position.coords.latitude;
-  var longitude = position.coords.longitude;
+            //*********DIRECTIONS AND ROUTE**********************//
+            source = document.getElementById("txtSource").value;
+            destination = document.getElementById("txtDestination").value;
 
-  //Creating a new object for using latitude and longitude values with Google map.
-  var latLng = new google.maps.LatLng(latitude, longitude);
+            var request = {
+                origin: source,
+                destination: destination,
+                travelMode: google.maps.TravelMode.DRIVING
+            };
+            directionsService.route(request, function (response, status) {
+                if (status == google.maps.DirectionsStatus.OK) {
+                    directionsDisplay.setDirections(response);
+                }
+            });
 
-  showMap(latLng);
+            //*********DISTANCE AND DURATION**********************//
+            var service = new google.maps.DistanceMatrixService();
+            service.getDistanceMatrix({
+                origins: [source],
+                destinations: [destination],
+                travelMode: google.maps.TravelMode.DRIVING,
+                unitSystem: google.maps.UnitSystem.METRIC,
+                avoidHighways: false,
+                avoidTolls: false
+            }, function (response, status) {
+                if (status == google.maps.DistanceMatrixStatus.OK && response.rows[0].elements[0].status != "ZERO_RESULTS") {
+                    var distance = response.rows[0].elements[0].distance.text;
+                    var duration = response.rows[0].elements[0].duration.text;
+                    var dvDistance = document.getElementById("dvDistance");
+                    dvDistance.innerHTML = "";
+                    dvDistance.innerHTML += "Distance: " + distance + "<br />";
+                    dvDistance.innerHTML += "Duration:" + duration;
 
-  addNearByPlaces(latLng);
-  createMarker(latLng);
-
-  //Also setting the latitude and longitude values in another div.
-  var div = document.getElementById('location');
-  div.innerHTML = 'You are at Latitude: ' + latitude + ', Longitude: ' + longitude;
-}
-
-function showMap(latLng) {
-  //Setting up the map options like zoom level, map type.
-  var mapOptions = {
-    center: latLng,
-    zoom: 18,
-    mapTypeId: google.maps.MapTypeId.ROADMAP
-  };
-
-  //Creating the Map instance and assigning the HTML div element to render it in.
-  map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
-}
-
-function addNearByPlaces(latLng) {
-
-  var nearByService = new google.maps.places.PlacesService(map);
-
-  var request = {
-    location: latLng,
-    radius: 1000,
-    types: ['food', 'bakery', 'cafe', 'grocery_or_supermarket', 'meal_delivery','restaurant', 'meal_takeaway', 'shopping_mall']
-  };
-
-  nearByService.nearbySearch(request, handleNearBySearchResults);
-}
-
-function handleNearBySearchResults(results, status) {
-  if (status == google.maps.places.PlacesServiceStatus.OK) {
-    for (var i = 0; i < results.length; i++) {
-      var place = results[i];
-      createMarker(place.geometry.location, place);
-    }
-  }
-}
-
-function createMarker2(latLng, placeResult) {
-  var markerOptions = {
-    position: latLng,
-    map: map,
-    animation: google.maps.Animation.Bo,
-    clickable: true
-  }
-  //Setting up the marker object to mark the location on the map canvas.
-  var marker = new google.maps.Marker(markerOptions);
-
-  if (placeResult) {
-    var content = placeResult.name+'<br/>'+placeResult.vicinity+'<br/>'+placeResult.types;
-    addInfoWindow(marker, latLng, content);
-  }
-  else {
-    var content = 'You are here: ' + latLng.lat() + ', ' + latLng.lng();
-    addInfoWindow(marker, latLng, content);
-  }
-
-}
-
-function createMarker(latLng, placeResult) {
-  var markerOptions = {
-    position: latLng,
-    map: map,
-    animation: google.maps.Animation.DROP,
-    clickable: true
-  }
-  //Setting up the marker object to mark the location on the map canvas.
-  var marker = new google.maps.Marker(markerOptions);
-
-  if (placeResult) {
-    var content = placeResult.name+'<br/>'+placeResult.vicinity+'<br/>'+placeResult.types;
-    addInfoWindow(marker, latLng, content);
-  }
-  else {
-    var content = 'You are here: ' + latLng.lat() + ', ' + latLng.lng();
-    addInfoWindow(marker, latLng, content);
-  }
-
-}
-
-function addInfoWindow(marker, latLng, content) {
-  var infoWindowOptions = {
-    content: content,
-    position: latLng
-  };
-
-  var infoWindow = new google.maps.InfoWindow(infoWindowOptions);
-
-  google.maps.event.addListener(marker, 'click', function() {
-    infoWindow.open(map);
-  });
-}
+                } else {
+                    alert("Unable to find the distance via road.");
+                }
+            });
+        }
